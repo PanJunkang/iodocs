@@ -1,31 +1,15 @@
-I/O Docs Community Edition in Node.js
-=====================================
-Copyright 2011-2014 Mashery, Inc.
+I/O Docs - Open Source in Node.js
+=================================
+Copyright 2012-2013 Mashery, Inc.
 
 [http://www.mashery.com](http://www.mashery.com)
 
 [http://developer.mashery.com](http://developer.mashery.com)
 
-MAJOR CHANGE LOG
-================
-### 2014-07-22 - Summer Release Feature Enhancements
-#### This set of updates addresses several feature requests around POST/PUT calls. There are several other enhancements listed below. Note, if you are using a version of I/O Docs Community Edition that pre-dates this release, you will need to update your schema. The structure is similar in many ways, but the top level objects have been renamed, as well as many of the key names.
-
-* Numerous schema changes and improvements
-  * Support for references
-  * Base paths and authorization moved from apiConfig to api{name}.json files
-  * More robust/extensible auth definition block
-* POST/PUT request body capabilities added
-  * Array type and interface added for use in request body
-  * Size and order support
-  * Serialized JSON support
-* Parameter location enhancements
-  * Placement in the query string, path or header
-* Method form UI generation driven by Alpaca/jQuery
-
 SYNOPSIS
 --------
-I/O Docs is a live interactive documentation system for RESTful web APIs. By defining APIs at the resource, method and parameter levels in a JSON schema, I/O Docs will generate a JavaScript client interface. API calls can be executed from this interface, which are then proxied through the I/O Docs server with payload data cleanly formatted (pretty-printed if JSON or XML). Basic HTML text tags are enabled in the JSON schema.
+I/O Docs is a live interactive documentation system for RESTful web APIs. By defining APIs at the resource, method and parameter
+levels in a JSON schema, I/O Docs will generate a JavaScript client interface. API calls can be executed from this interface, which are then proxied through the I/O Docs server with payload data cleanly formatted (pretty-printed if JSON or XML). Basic HTML text tags are enabled in the JSON schema.
 
 You can find the latest version here: [https://github.com/mashery/iodocs](https://github.com/mashery/iodocs)
 
@@ -105,7 +89,7 @@ Ideally, the `--config-file` arg would be possible to use with `npm start`, but 
 
 CONFIGURING API DEFINITION LOCATION
 -----------------------------------
-API definitions are, by default, stored in `./public/data/` and described by `./public/data/"apiName".json` and referenced by `./public/data/apiconfig.json`. This can
+API definitions are, by default, stored in `./public/data/` and described by `./public/data/apiconfig.json`. This can
 be overridden in `config.json` by setting the `"apiConfigDir"` property.
 
 
@@ -122,127 +106,119 @@ QUICK API CONFIGURATION EXAMPLE
 -------------------------------
 Adding an API to the I/O Docs configuration is relatively simple.
 
-First, append the api name to the `./public/data/apiconfig.json` file.
+First, append the new top-level service information to the `./public/data/apiconfig.json` file.
 
 Example:
    
 ```js
 "lowercaseapi": {
-    "name": "Lower Case API"
+    "name": "Lower Case API",
+    "protocol": "http",
+    "baseURL": "api.lowercase.sample.com",
+    "publicPath": "/v1",
+    "auth": "key",
+    "keyParam": "api_key_var_name",
+    "headers": {
+                "Accept": "application/json",
+                "Foo": "bar"
+    }
 }
 ```
 
-Add the file `./public/data/lowercaseapi.json` to define the API. 
+Add the file `./public/data/lowercaseapi.json` to define the API.
 
 Example:
    
 ```js
-
 {
-    "name": "Lower Case API",
-    "description": "An example api.",
-    "protocol": "rest",
-    "basePath": "http://api.lowercase.sample.com",
-    "publicPath": "/v1",
-    "auth": {
-        "key": {
-            "param": "key"
-        }
-    },
-    "headers": {
-        "Accept": "application/json",
-        "Foo": "bar"
-    },
-    "resources": {
-        "Resource Group A": {
-            "methods": {
-                "MethodA1": {
-                    "name": "Method A1",
-                    "path": "/a1/grab",
-                    "httpMethod": "GET",
-                    "description": "Grabs information from the A1 data set.",
-                    "parameters": {
-                        "param1": {
-                            "type": "string",
-                            "required": true,
-                            "default": "",
-                            "description": "Description of the first parameter."
+    "endpoints": [
+        {
+            "name": "Resource Group A",
+            "methods": [
+                {
+                    "MethodName": "Method A1",
+                    "Synopsis": "Grabs information from the A1 data set",
+                    "HTTPMethod": "GET",
+                    "URI": "/a1/grab",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "param_1_name",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "string",
+                            "Description": "Description of the first parameter."
                         }
-                    }
+                    ]
                 },
-                "MethodA1User": {
-                    "name": "Method A1 User",
-                    "path": "/a1/grab/{userId}",
-                    "httpMethod": "GET",
-                    "description": "Grabs information from the A1 data set for a specific user",
-                    "parameters": {
-                        "param1": {
-                            "type": "string",
-                            "required": true,
-                            "default": "",
-                            "description": "Description of the first parameter."
+                {
+                    "MethodName": "Method A1 User",
+                    "Synopsis": "Grabs information from the A1 data set for a specific user",
+                    "HTTPMethod": "GET",
+                    "URI": "/a1/grab/:userId",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "param_1_name",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "string",
+                            "Description": "Description of the first parameter."
                         },
-                        "userId": {
-                            "type": "string",
-                            "required": true,
-                            "default": "",
-                            "description": "The userId parameter that is in the URI."
+                        {
+                            "Name": "userId",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "string",
+                            "Description": "The userId parameter that is in the URI."
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         }
-    }
+    ]
 }
 ```
 
 By default the parameters are added to the query string. But if the URI contains a named variable, it will substitute the value in the path.
 
-TOP-LEVEL SERVICE CONFIG DETAILS
+TOP-LEVEL SERVICE CONFIG DETAILS - apiconfig.json
 -------------------------------------------------
-
-The *apiconfig.json* file contains the name of an API to show upon initiation.
-
-```js
-"lowercaseapi": {
-        "name": "Lower Case API"
-}
-```
-
-The high-level information about an API is set in the config JSON file.
+The *apiconfig.json* file contains high-level information about an API.
 
 ### Example #1 - Explanation of each field in an example API config that uses basic key authentication:
 
 ```js
-{
-    "name": "Lower Case API",
-    "protocol": "rest",
-    "basePath": "http://api.lowercase.sample.com",
+"lower": {
+    "name": "My API",
+    "protocol": "http",
+    "baseURL": "api.lowercase.sample.com",
     "publicPath": "/v1",
-    "auth": {
-        "key": {
-            "param": "key",
-            "location": "query"
-        }
-    },
+    "auth": "key",
+    "keyParam": "api_key_var_name",
     "headers": {
-        "Accept": "application/json",
-        "Foo": "bar"
-    },
-    ...
+                "Accept": "application/json",
+                "Foo": "bar"
+    }
+}
 ```
 
 Line:
 
-1. "name" key value is a string that holds the name
-    of the API that is used in the Jade template output. Also true in *apiconfig.json*.
+1. Handle of the API. It is used to pull up the client 
+   interface in the URL:
 
-2. "protocol" key value is either *rest* or *soap*
+    Ex: http://127.0.0.1:3000/lower
 
-3. "basePath" key value is the host path of
-    the API calls
+2. "name" key value is a string that holds the name
+    of the API that is used in the Jade template output.
 
-4. "publicPath" key value is the full path prefix prepended
+3. "protocol" key value is either *http* or *https*
+
+4. "baseURL" key value is the host name of
+    the API calls (should not include protocol)
+
+5. "publicPath" key value is the full path prefix prepended
     to all method URIs. This value often includes the version
     in RESTful APIs.
 
@@ -251,75 +227,76 @@ Line:
     In the Example #3 below, there is also "privatePath"
     which is used for endpoints behind protected resources.
 
-5. "auth" container holds the authorization information. If absent, API requires no authorization.
+6. "auth" key value is the auth method. Valid values can be:
 
-6. The key value that describes the auth method. Valid values can be:
          "key" - simple API key in the URI
-         "oauth" - OAuth 1.0/2.0
+         "oauth1" - OAuth 1.0/1.0a
          "" - no authentication
 
-7. "param" key value is name of the parameter that
+7. "keyParam" key value is name of the query parameter that
     is added to an API request when the "auth" key value from
-    (6) is set to "key".
+    (5) is set to "key".
 
-8. "location" (optional) key value sets where the api key will go in the request. Defaults to "query".
-
-9. "headers" object contains key value pairs of HTTP headers
+8. "headers" object contains key value pairs of HTTP headers
     that will be sent for each request for API. These are
     static key/value pairs.
+
+12. Closing curly-bracket ;)
+
 
 ---
 
 ### Example #2 - Explanation of each field in an example API config that uses basic key authentication with signatures (signed call).
 
 ```js
-{
-    "name": "Lower Case API",
-    "protocol": "rest",
-    "basePath": "http://api.lowercase.sample.com",
-    "publicPath": "/v1",
-    "auth": {
-        "key": {
-            "param": "key",
-            "signature": {
-                "type": "signed_md5",
-                "param": "sig",
-                "digest": "hex",
-                "location": "header"
-            }
-        }
-    },
-    ...
+"upper": {
+   "name": "Upper API",
+   "protocol": "http",
+   "baseURL": "api.upper.sample.com",
+   "publicPath": "/v3",
+   "auth": "key",
+   "keyParam": "api_key_var_name",
+   "signature": {
+      "type": "signed_md5",
+      "sigParam": "sig",
+      "digest": "hex"  
+   }
+}
 ```
 
 Line:
 
-1. "name" key value is a string that holds the name
-    of the API that is used in the Jade template output. Also true in *apiconfig.json*.
+1. Handle of the API. It is used to pull up the client 
+   interface in the URL:
 
-2. "protocol" key value is either *rest* or *soap*
+    Ex: http://127.0.0.1:3000/upper
 
-3. "basePath" key value is the host path of
-    the API calls
+2. "name" key value is a string that holds the name
+    of the API that is used in the Jade template output.
 
-4. "publicPath" key value is the full path prefix prepended
+3. "protocol" key value is either *http* or *https*
+
+4. "baseURL" key value is the host name of
+    the API calls (should not include protocol)
+
+5. "publicPath" key value is the full path prefix prepended
     to all method URIs. This value often includes the version
     in RESTful APIs.
 
-    Ex: "/v1"
+    Ex: "/v3"
 
     In the Example #3 below, there is also "privatePath"
     which is used for endpoints behind protected resources.
 
-5. "auth" container holds the authorization information. If absent, API requires no authorization.
+6. "auth" key value is the auth method. Valid values can be:
 
-6. The key value that describes the auth method. Valid values can be:
          "key" - simple API key in the URI
-         "oauth" - OAuth 1.0/2.0
+         "oauth1" - OAuth 1.0/1.0a
+         "" - no authentication
 
-7. "param" key value is name of the parameter that
+7. "keyParam" key value is the name of the query parameter that
     is added to an API request when the "auth" key value from
-    (6) is set to "key".
+    (5) is set to "key"
 
 8. "signature" is a JSON object that contains the details about
    the API call signing requirements. The signature routine coded
@@ -330,90 +307,219 @@ Line:
    More signature methods are available with crypto.js, but have
    not been included in the code as options.
 
-10. "param" key value is the name of the parameter that
+10. "sigParam" key value is the name of the query parameter that
     is added to an API request that holds the digital signature.
 
 11. "digest" key value is the digest algorithm that is used.
     Values can be *hex*, *base64* or *binary*.
 
-12. "location" (optional) key value sets where the signature will go in the request. Defaults to "header".
+12. Closing curly-bracket for the "signature" object
+
+13. Closing curly bracket for main object.
 
 
 ---
 
 
-### Example #3 - Foursquare API config that uses 3-legged OAuth 2.0
+### Example #3 - Twitter API config that uses 3-legged OAuth
 
 ```js
-{
-    "name": "Foursquare (OAuth 2.0 Auth Code)",
-    "protocol": "rest",
-    "basePath": "https://api.foursquare.com",
-    "privatePath": "/v2",
-    "auth": {
-        "oauth": {
-            "version": "2.0",
-            "type": "authorization-code",
-            "base_uri": "https://foursquare.com/",
-            "authorize_uri": "oauth2/authenticate",
-            "access_token_uri": "oauth2/access_token_uri,
-            "token": {
-                "param": "oauth_token",
-                "location": "query"
-            }
-        }
-    },
-    ...
+"twitter": {
+    "name": "Twitter API",
+    "protocol": "http",
+    "baseURL": "api.twitter.com",
+    "publicPath": "/1",
+    "privatePath": "/1",
+    "booleanTrueVal": "true",
+    "booleanFalseVal": "false",
+    "auth": "oauth",
+    "oauth" : {
+       "type": "three-legged",
+       "requestURL": "https://api.twitter.com/oauth/request_token",
+       "signinURL": "https://api.twitter.com/oauth/authorize?oauth_token=",
+       "accessURL": "https://api.twitter.com/oauth/access_token",
+       "version": "1.0",
+       "crypt": "HMAC-SHA1"
+   },
+   "keyParam": ""
+}
 ```
 
 Line:
 
-1. "name" key value is a string that holds the name
-    of the API that is used in the Jade template output. Also true in *apiconfig.json*.
+1. Handle of the API. It is used to pull up the client
+    interface in the URL:
 
-2. "protocol" key value is either *rest* or *soap*
+    Ex: http://127.0.0.1:3000/twitter
 
-3. "basePath" key value is the host path of
-    the API calls
+2. "name" key value is a string that holds the name
+    of the API that is used in the Jade template output.
 
-4. "privatePath" key value is the path prefix prepended
+3. "protocol" key value contains either *http* or *https*,
+    but you're welcome to try other protocols.
+
+4. "baseURL" key value is the base URL that accepts
+    the API calls (should not include protocol)
+
+5. "publicPath" key value is the path prefix prepended
+    to all method URIs for non-protected method resources.
+    This value often includes the version in RESTful APIs.
+
+    Ex: "/v1", "/1", etc.
+
+6. "privatePath" key value is the path prefix prepended
     to all method URIs for OAuth protected method resources.
     This value is most often the version in RESTful APIs.
 
     Ex: "/v1", "/1", etc.
 
-5. "auth" container holds the authorization information. If absent, API requires no authorization.
+7. "booleanTrueVal" key value is the default value for
+    true Boolean values that are sent in API requests.
+    Some APIs are designed to accept a wide variety
+    of true derivatives, but some are very strict about
+    this value.
 
-6. "oauth" key value is a JSON object that contains the
-    OAuth implementation details for this API.
+    Ex: "true", "TRUE", "True", "t", "T", "1", etc.
+    Default: "true"
 
-7. "version" key value is the OAuth version. OAuth 1.0 and 2.0 supported.
+8. "booleanFalseVal" key value is the default value for
+    false Boolean values that are sent in API requests.
+    Some APIs are designed to accept a wide variety
+    of false derivatives, but some are very strict about
+    this value.
 
-8. "type" key value is the OAuth 2 authorization flow
+    Ex: "false", "FALSE", "False", "f", "F", "0", etc.
+    Default: "false"
+
+9. "auth" key value is set to "oauth" when OAuth is the
+    authentication mechanism. Field is required.
+
+10. "oauth" key value is a JSON object that contains the
+    OAuth implementation details for this API. Field is
+    required when "auth" value is "oauth".
+
+11. "type" key value is the OAuth is the authorization flow
+     used for this API. Valid values are "three-legged" (normal
+     authorization flow) and "two-legged" (no authorization flow).
+
+12. "requestURL" key value is the Request Token URL used in
+    the OAuth dance (used in *three-legged* scenario).
+
+13. "signinURL" key value is the User Authorization URL used
+    in the OAuth dance (where the user is redirected to provide
+    their credentials -- used in *three-legged* scenario).
+
+14. "accessURL" key value is the Access Token URL used in the
+    OAuth dance (used in *three-legged* scenario).
+
+15. "version" key value is the OAuth version. As of I/O Docs v1.1,
+    "1.0" is the only supported version. Note: use "1.0" for both
+    1.0 and 1.0A implementations.
+
+16. "crypt" key value is the OAuth signature method. As of I/O Docs
+    v1.1 "HMAC-SHA1" is the only supported signing method.
+
+17. Closing curly bracket for "oauth" JSON object.
+
+18. "keyParam" key value is blank when OAuth is the authentication
+    method.
+
+19. Closing curly bracket for main object.
+
+
+---
+
+
+### Example #4 - Foursquare API config that uses Authorization Code OAuth 2
+
+```js
+"foursquare": {
+    "name": "Foursquare (OAuth 2.0 Auth Code)",
+    "protocol": "https",
+    "baseURL": "api.foursquare.com",
+    "publicPath": "",
+    "privatePath": "/v2",
+    "auth": "oauth2",
+    "oauth2": {
+        "type": "authorization-code",
+        "baseSite": "https://foursquare.com/",
+        "authorizeURL": "oauth2/authenticate",
+        "accessTokenURL": "oauth2/access_token",
+        "tokenName": "oauth_token",
+        "authorizationHeader":"N"
+    },
+    "keyParam":""
+}
+```
+
+Line:
+
+1. Handle of the API. It is used to pull up the client
+    interface in the URL:
+
+    Ex: http://localhost:3000/foursquare
+
+2. "name" key value is a string that holds the name
+    of the API that is used in the Jade template output.
+
+3. "protocol" key value contains either *http* or *https*,
+    but you're welcome to try other protocols.
+
+4. "baseURL" key value is the base URL that accepts
+    the API calls (should not include protocol)
+
+5. "publicPath" key value is the path prefix prepended
+    to all method URIs for non-protected method resources.
+    This value often includes the version in RESTful APIs.
+
+    Ex: "/v1", "/1", etc.
+
+6. "privatePath" key value is the path prefix prepended
+    to all method URIs for OAuth2 protected method resources.
+    This value is most often the version in RESTful APIs.
+
+    Ex: "/v1", "/1", etc.
+
+9. "auth" key value is set to "oauth2" when OAuth2 is the
+    authentication mechanism. Field is required.
+
+10. "oauth" key value is a JSON object that contains the
+    OAuth implementation details for this API. Field is
+    required when "auth" value is "oauth".
+
+11. "type" key value is the OAuth 2 authorization flow
     used for this API. Valid values are "authorization-code", 
     "client_credentials", and "implicit", named for each grant
     found here: "http://tools.ietf.org/html/rfc6749". 
 
-9. "base_uri" key value is the base website URL used in
+12. "baseSite" key value is the base website URL used in
     the OAuth 2 dance. It is required.
 
-10. "authorize_uri" key value is the url string used to 
+13. "authorizeURL" key value is the url string used to 
     retrieve the authorization token in the 
     "authorization-code" OAuth 2 flow. This is not necessary 
     in any other OAuth 2 flow.
 
-11. "access_token_uri" key value is the url string used to 
+14. "accessTokenURL" key value is the url string used to 
     retrieve the access (Bearer) token in any OAuth 2 flow.
     This is required in all OAuth 2 flows. 
 
-12. "token" container instructs I/O Docs where to use the access/bearer token on requests. If the "location" is set 
+15. "tokenName" key value if the API does not use "access_token"
     as the default token name when making calls with the 
     access token in the url query parameters. Not required if 
     "access_token" is used. 
-    
-13. "param" is the parameter name for access token. This is valid only if the location value is "query"
 
-14. "location" (optional) key value that sets where the bearer token will go. Acceptable values are: "header" and "query". If set to header, I/O Docs will follow the "Authorization: Bearer XXX" pattern. If set to "query", the name of the key will be dictated by the "param" value on line 13.
+16. "authorizationHeader" must by "Y" if the access (Bearer)
+    token is sent through the request header as 
+    "Authorization: Bearer access_token". Only required if this
+    is the case.
+
+17. Closing curly bracket for "oauth2" JSON object. 
+
+18. "keyParam" key value is blank when OAuth 2 is the authentication
+    method.
+
+19. Closing curly bracket for main object.
 
 Additional Note: All redirect URIs for the Foursquare API & your 
 Foursqare app must be set through the Foursquare developer site. 
@@ -434,181 +540,88 @@ You should look at the *./public/data/* directory for examples.
 
 ```js
 {
-    "name": "Lower Case API",
-    "protocol": "rest",
-    "basePath": "http://api.lowercase.sample.com",
-    "resources": {
-        "User Resources": {
-            "methods": {
-                "showUsers": {
-                    "name": "users/show",
-                    "description": "Returns extended user information",
-                    "httpMethod": "GET",
-                    "path": "/users/show.json",
-                    "parameters": {
-                        "user_id": {
-                            "title":"user_id",
-                            "required":true,
-                            "default":"",
-                            "type":"string",
-                            "description":"The ID of the user"
-                        },
-                        "cereal": {
-                            "title": "cereal",
-                            "required": true,
-                            "default": "fruitscoops",
-                            "type": "string",
-                            "enum": ["fruitscoops","sugarbombs","frostedteeth"],
-                            "description": "The type of cereal desired."
-                        },
-                        "skip_status": {
-                            "title": "skip_status",
-                            "required": false,
-                            "default": "false",
-                            "type":"boolean",
-                            "description":"If true, status not included."
-                            "location": "header"
-                        },
-                        "include_status": {
-                            "title": "include_status",
-                            "required": false,
-                            "default": false,
-                            "type": boolean,
-                            "description": "If true, status included."
-                            "booleanValues": ["yes","no"]
-                        }
-                    }
-                }
-            }
-        }
-    }
+   "name":"User Resources",
+   "methods":[
+      {
+        "MethodName":"users/show",
+         "Synopsis":"Returns extended user information",
+         "HTTPMethod":"GET",
+         "URI":"/users/show.json",
+         "RequiresOAuth":"N",
+         "parameters":[
+             {
+                "Name":"user_id",
+                "Required":"Y",
+                "Default":"",
+                "Type":"string",
+                "Description":"The ID of the user",
+             },
+             {
+                "Name":"cereal",
+                "Required":"Y",
+                "Default":"fruitscoops",
+                "Type":"enumerated",
+                "EnumeratedList": [
+                    "fruitscoops",
+                    "sugarbombs",
+                    "frostedteeth"
+                   ],
+                "EnumeratedDescription": {
+                    "fruitscoops": "Fruit Scoops (packed with fruit goodness)",
+                    "sugarbombs": "Sugar Bombs (filled with sugar)",
+                    "frostedteeth": "Frosted Teeth (sugar coating)"
+                   },
+                "Description":"The type of cereal desired"
+             },
+             {
+                "Name":"skip_status",
+                "Required":"N",
+                "Default":"",
+                "Type":"boolean",
+                "Description":"If true, status not included"
+             }
+        ]
+    }]
+}
 ```
 
 Line:
 
-1. "name" key value is a string that holds the name
-    of the API that is used in the Jade template output. Also true in *apiconfig.json*.
+3. "name" key holds the value of the Resource name. Methods are grouped into Resources.
 
-2. "protocol" key value is either *rest* or *soap*
+4. "methods" key value is an array of JSON objects (each one being a method)
 
-3. "basePath" key value is the host path of
-    the API calls
+6. "MethodName" key value is a string that is displayed via the view template.
 
-4. "resources" JSON container. Methods are grouped into resources.
+7. "Synopsis" key value is a short description of the method.
 
-5. The first resource.
+8. "HTTPMethod" key value can be either GET, POST, DELETE or PUT (all caps)
 
-6. "methods" key value is an array of JSON objects (each one being a method)
+9. "URI" key value is the path to the method that is appended to the *baseURL* and the public/private path.
 
-7. The first method.
+10. "RequiresOAuth" key value is either Y or N. If Y, the *privatePath* is used from the top-level config. If N, the *publicPath* is used from the top-level config.
 
-8. "name" key value is a string that is displayed via the view template. The name of the method.
+11. "parameters" key value is an array of JSON objects (each one being a parameter)
 
-9. "description" key value is a short description of the method.
+13. "Name" key value is a string that contains the name of the parameter.
 
-10. "httpMethod" key value can be either GET, POST, DELETE or PUT (all caps)
+14. "Required" key value is either Y or N. If Y, the parameter will be output as bold.
 
-11. "path" key value is the path to the method that is appended to the *baseURL* and the public/private path.
+15. "Default" key value is a string, containing a default value that will be automatically populated onto the form.
 
-12. "parameters" key value is a JSON objects containing the parameters
+16. "Type" key value can be an arbitrary string that describes the variable type; however, the value is *boolean* or *enumerated* a drop-down (select) box will appear.
 
-13. The first parameter.
+17. "Description" key value is a string, containing the description of the parameter.
 
-14. "title" key value is a string that contains the name of the parameter.
+23. "Type" key value is set to *enumerated* for this parameter.
 
-15. "required" key value is either true or false.
+24. "EnumeratedList" key value is an array of enumerated values that will render a drop-down (select box) on the form.
 
-16. "default" key value is a string, containing a default value that will be automatically populated onto the form.
+25. "EnumeratedDescription" key value is an object of enumerated values as keys, and their descriptions as values that will be displayed below the Description.
 
-17. "type" key value can be an arbitrary string that describes the variable type; however, the value is *boolean* or *enumerated* a drop-down (select) box will appear.
+26. Each value in the list is a string.
 
-18. "description" key value is a string, containing the description of the parameter.
-
-25. "enum" key value is an array of enumerated values that will render a drop-down (select box) on the form.
-
-32. "type" key value is *boolean* that will render a drop-down (select box) on the form for *true* and *false*.
-
-24. "location" (optional) key value determines where the parameter will go. Can be "query" or "header". Default to "query".
-
-43. "booleanValues" is an array of [true, false] alternatives that will instead populate the drop down box.
-
-
-### Example #2 - Request Bodies & Arrays
-
-```js
-{
-    "name": "Lower Case API",
-    "protocol": "rest",
-    "basePath": "http://api.lowercase.sample.com",
-    "schemas": {
-        "showUsers": {
-            "properties": {
-                "bodyParam": {
-                    "title":"bodyParam",
-                    "required":true,
-                    "default":"",
-                    "type":"string",
-                    "description":"An example parameter in the body"
-                },
-                "arrayExample": {
-                    "type": "array",
-                    "items": {
-                        "title":"arrayExample",
-                        "required": true,
-                        "default": "foobar",
-                        "type":"string",
-                        "description":"An array in the body."
-                    }
-                }
-            }
-        }
-    },
-    "resources": {
-        "User Resources": {
-            "methods": {
-                "showUsers": {
-                    "name": "users/show",
-                    "description": "Returns extended user information",
-                    "httpMethod": "GET",
-                    "path": "/users/show.json",
-                    "request": {
-                        "$ref": "showUsers"
-                    },
-                    "parameters": {
-                        "user_id": {
-                            "title":"user_id",
-                            "required":true,
-                            "default":"",
-                            "type":"string",
-                            "description":"The ID of the user"
-                        }
-                    }
-                }
-            }
-        }
-    }
-```
-
-Line:
-
-4. "schemas" JSON object. Contains the parameters that will go into the request body for all methods.
-
-5. The first method to contain a request body.
-
-6. "properties" JSON object containing the parameters that will go into the request body.
-
-7. The first request body parameter. The format is the same as in "resources"
-
-14. An array parameter. An array parameter can add as many values to the parameter as necessary. The default location for an array will always be "body".
-
-15. "type" key value set to *array*. Necessary for the array functionality to work.
-
-16. "items" JSON object that contains the parameter information. Format is consistent from resources parameters. 
-
-25. "request" JSON object holds the reference to the request body parameters
-
-26. "$ref" key value is the reference to the same string in "schemas"
-
+27. "Type" key value is *boolean* that will render a drop-down (select box) on the form for *true* and *false*.
 
 SUPPORT
 =======
